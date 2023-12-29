@@ -1,0 +1,41 @@
+steps:
+- name: 'hashicorp/terraform:1.0.0'
+  id: 'terraform-init'
+  entrypoint: 'sh'
+  args: ['-c', 'terraform init']
+
+- name: 'hashicorp/terraform:1.0.0'
+  id: 'terraform-plan'
+  entrypoint: 'sh'
+  args: ['-c', 'terraform plan -out=tfplan -var="gcp_project=$PROJECT_ID" && terraform show -json tfplan > tfplan.json']
+
+- name: 'bridgecrew/checkov:latest'
+  id: 'checkov-scan'
+  entrypoint: 'sh'
+  args: ['-c', 'checkov -f tfplan.json --framework terraform_plan']
+  waitFor:
+  - 'terraform-plan'
+
+- name: 'snyk/snyk-cli:terraform-0.0.3'
+  id: 'snyk-scan'
+  entrypoint: 'sh'
+  args: ['-c', 'snyk iac test --all-projects']
+  secretEnv: ['SNYK_TOKEN']
+- name: 'hashicorp/terraform:1.0.0'
+  id: 'terraform-apply'
+  entrypoint: 'sh'
+  args: ['-c', 'terraform apply tfplan']
+  waitFor:
+  - 'checkov-scan'
+  - 'snyk-scan'
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/682035886856/secrets/rjgke/versions/1
+    env: 'SNYK_TOKEN'
+
+options:
+  substitution_option: 'ALLOW_LOOSE'
+  env:
+   - 'PROJECT_ID=${PROJECT_ID}'
+   - 'TF_VAR_gcp_project=${PROJECT_ID}'
