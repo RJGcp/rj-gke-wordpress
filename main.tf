@@ -3,7 +3,11 @@ resource "google_container_cluster" "gke_cluster" {
   location = var.gcp_region
 
   network    = google_compute_network.private_network.name
-  subnetwork = data.google_compute_subnetwork.subnet.name
+  subnetwork = data.google_compute_subnetwork.subnet.self_link
+
+  # We can't create a cluster with no node pool defined, but we want to only use
+  # separately managed node pools. So we create the smallest possible default
+  # node pool and immediately delete it.
 
   remove_default_node_pool = true
   initial_node_count       = 1
