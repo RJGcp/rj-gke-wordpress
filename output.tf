@@ -17,3 +17,15 @@ output "mysql_instance_connection_name" {
 output "mysql_database_name" {
   value = google_sql_database.wordpress_database.name
 }
+
+output "client_cert" {
+  value = google_sql_ssl_cert.sql_ssl_cert.client_cert
+}
+
+output "client_key" {
+  value = google_sql_ssl_cert.sql_ssl_cert.client_key
+}
+
+output "server_ca" {
+  value = google_sql_ssl_cert.sql_ssl_cert.server_ca
+}

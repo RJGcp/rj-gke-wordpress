@@ -1,32 +1,30 @@
-resource "google_sql_database_instance" "mysql_instance" {
-  name             = "wordpress-db"
-  database_version = "MYSQL_5_7"
+resource "google_sql_database_instance" "sql_instance" {
+  name             = "wordpress-cloud-sql-instance"
+  database_version = "POSTGRES_13"
+  region           = var.gcp_region
 
   settings {
-    tier = "db-n1-standard-1"
-
-    backup_configuration {
-      enabled = true
-    }
+    tier = "db-f1-micro"
 
     ip_configuration {
-      ipv4_enabled    = true
-      require_ssl     = true
-      private_network = google_compute_network.private_network.self_link
+      authorized_networks {
+        name  = "example-cidr"
+        value = "192.168.0.0/16"
+      }
+
+      # Require SSL/TLS connections
+      require_ssl = true
     }
 
-    location_preference {
-      zone = var.gcp_zone
+    # Enable automatic backups and PITR
+    backup_configuration {
+      enabled                = true
+      point_in_time_recovery = true
     }
-
-    availability_type = "REGIONAL"
   }
 }
 
-resource "google_sql_database" "wordpress_database" {
-  name       = "wordpress"
-  instance   = google_sql_database_instance.mysql_instance.name
-  collation  = "utf8_general_ci"
-  depends_on = [google_sql_database_instance.mysql_instance]
+resource "google_sql_ssl_cert" "sql_ssl_cert" {
+  common_name = "sql-instance-ssl"
+  instance    = google_sql_database_instance.sql_instance.name
 }
-
