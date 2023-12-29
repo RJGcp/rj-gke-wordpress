@@ -3,7 +3,7 @@ resource "google_container_cluster" "gke_cluster" {
   location = var.gcp_region
 
   network    = google_compute_network.private_network.name
-  subnetwork = data.google_compute_subnetwork.subnet.self_link
+  subnetwork = google_compute_subnetwork.private_subnet.name
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -76,11 +76,11 @@ resource "google_sql_database" "wordpress_database" {
 
 resource "google_compute_network" "private_network" {
   name                    = "wordpress-gke-network"
-  auto_create_subnetworks = "true"
+  auto_create_subnetworks = false
+  routing_mode            = "REGIONAL"
 }
 
-data "google_compute_subnetwork" "subnet" {
-  name = "default"
-  region = "us-central1"
-  filter = "name eq 'default' AND network eq '${google_compute_network.private_network.self_link}'"
+resource "google_compute_subnetwork" "private_subnet" {
+  name = "rj-network-subnet"
+  ip_cidr_range = "10.10.0.0/24"
 }
