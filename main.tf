@@ -3,7 +3,7 @@ resource "google_container_cluster" "gke_cluster" {
   location = var.gcp_region
 
   network    = google_compute_network.private_network.name
-  subnetwork = google_compute_subnetwork.private_subnetwork.name
+  subnetwork = data.google_compute_subnetwork.subnet.name
 
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -73,4 +73,10 @@ resource "google_sql_database" "wordpress_database" {
 resource "google_compute_network" "private_network" {
   name                    = "wordpress-gke-network"
   auto_create_subnetworks = "true"
+}
+
+data "google_compute_subnetwork" "subnet" {
+  name = "default"
+  region = "us-central1"
+  network = google_compute_network.private_network.self_link
 }
