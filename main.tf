@@ -82,5 +82,5 @@ resource "google_compute_network" "private_network" {
 data "google_compute_subnetwork" "subnet" {
   name = "default"
   region = "us-central1"
-  network = google_compute_network.private_network.self_link
+  filter = "name eq 'default' AND network eq '${google_compute_network.private_network.self_link}'"
 }
