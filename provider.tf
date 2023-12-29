@@ -1,5 +1,5 @@
 provider "google" {
-  project     = "burner-ravk"
-  region      = "us-central1"
+  project = "burner-ravk"
+  region  = "us-central1"
 }
 
