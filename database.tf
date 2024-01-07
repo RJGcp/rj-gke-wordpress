@@ -16,10 +16,9 @@ resource "google_sql_database_instance" "sql_instance" {
       require_ssl = true
     }
 
-    # Enable automatic backups and PITR
+    # Enable automatic backups
     backup_configuration {
-      enabled                = true
-      point_in_time_recovery = true
+      enabled = true
     }
   }
 }
